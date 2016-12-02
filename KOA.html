@@ -1,0 +1,356 @@
+<html>
+	<head>
+		<title>My first Three.js app</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+	<body>
+		<script src="js/three.js"></script>
+		<script src="js/OrbitControls.js"></script>
+
+	<div align="center" id="music_player">
+		<audio id="player" controls>
+		<source src="audio/my_heart.mp3" type="audio/mpeg">
+		Your browser does not support the audio element.
+		</audio>
+	</div>
+		<script>
+		
+		var distance_x_ship = -170;
+		var scene = new THREE.Scene();
+		var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+		var renderer = new THREE.WebGLRenderer();
+		renderer.setSize(window.innerWidth, window.innerHeight);
+		//renderer.setClearColor(0x3399ff);
+		//renderer.setClearColor(0x00ffff);
+		controls = new THREE.OrbitControls( camera, renderer.domElement );
+		controls.maxPolarAngle = Math.PI/2; 
+		controls.target = new THREE.Vector3(distance_x_ship, 5, 0);
+
+		document.body.appendChild(renderer.domElement);
+		
+		//add sky
+		var geometry = new THREE.SphereGeometry( 500, 60, 40 );
+		geometry.scale( - 1, 1, 1 );
+		var material = new THREE.MeshBasicMaterial( {
+		  map: new THREE.TextureLoader().load( 'textures/rainy.jpg' )
+		} );
+		sky_mesh = new THREE.Mesh( geometry, material );
+		sky_mesh.rotation.x =48.5;
+		scene.add( sky_mesh );
+		
+		//add lights
+		var light = new THREE.PointLight(0xffffff, 1, 50);
+		light.position.set(-10, 10, 10);
+		scene.add(light);
+		
+
+		var light2 = new THREE.PointLight( 0xffffff, 1, 50 ); // color, intensity, distance
+		light2.position.set( 10, 10, 10 );
+		scene.add(light2);
+
+		var light3 = new THREE.PointLight( 0xffffff, 1, 50 ); // color, intensity, distance
+		light3.position.set( 25, -20, 10 );
+		scene.add(light3);
+
+
+		var light4 = new THREE.PointLight(0xffffff, 1, 50);
+		light4.position.set(-10, 10, -10);
+		scene.add(light4);
+		
+
+		var light5 = new THREE.PointLight( 0xffffff, 1, 50 ); // color, intensity, distance
+		light5.position.set( 10, 10, -10 );
+		scene.add(light5);
+
+		var light6 = new THREE.PointLight( 0xffffff, 1, 50 ); // color, intensity, distance
+		light6.position.set( 25, -20, -10 );
+		scene.add(light6);
+
+		var light7 = new THREE.PointLight( 0xffffff, 1, 200 ); // color, intensity, distance
+		light7.position.set( 220, 10, 100 );
+		scene.add(light7);
+
+
+		// Load the island 
+		var loader = new THREE.JSONLoader().load("models/island.json", function(geometry, materials){
+		  var material = new THREE.MultiMaterial(materials);
+		  island_mesh = new THREE.Mesh(geometry, material);
+
+		  //mesh.rotation.x += 0.5;
+		  //iceberg_mesh.position.x = 50;
+		  //iceberg_mesh.position.y = 1;
+		  island_mesh.position.x = 300;
+		  island_mesh.position.z = 200;
+		  island_mesh.scale.set(30,20,20);
+		  scene.add(island_mesh);
+		});
+
+		// Load the ship 
+		var loader = new THREE.JSONLoader().load("js/titanic_simulator.json", function(geometry, materials){
+		  var material = new THREE.MultiMaterial(materials);
+		  ship_mesh = new THREE.Mesh(geometry, material);
+		  ship_mesh.rotation.y = 4.7;
+		  ship_mesh.position.x = distance_x_ship;
+		  //ship_mesh.rotation.set(ship_mesh.rotation.x+=5, ship_mesh.rotation.y+=5, ship_mesh.rotation.z+= -5);
+		  //mesh.rotation.x += 0.5;
+		  scene.add(ship_mesh);
+		});
+
+		// Load the iceberg 
+		var loader = new THREE.JSONLoader().load("js/iceberg.json", function(geometry, materials){
+		  var material = new THREE.MultiMaterial(materials);
+		  iceberg_mesh = new THREE.Mesh(geometry, material);
+
+		  //mesh.rotation.x += 0.5;
+		  iceberg_mesh.position.x = 50;
+		  iceberg_mesh.position.y = 1;
+		  iceberg_mesh.position.z = 4;
+		  iceberg_mesh.scale.set(2,2,2);
+		  scene.add(iceberg_mesh);
+		});
+
+		// Load the iceberg2 
+		var loader = new THREE.JSONLoader().load("js/iceberg.json", function(geometry, materials){
+		  var material = new THREE.MultiMaterial(materials);
+		  iceberg_mesh2 = new THREE.Mesh(geometry, material);
+
+		  //mesh.rotation.x += 0.5;
+		  iceberg_mesh2.position.x = 50;
+		  iceberg_mesh2.position.y = 1;
+		  iceberg_mesh2.position.z = -3;
+		  iceberg_mesh2.rotation.y += 2;
+		  scene.add(iceberg_mesh2);
+		});
+
+
+	/*	var stats = new Stats();
+		stats.showPanel( 1 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+		document.body.appendChild( stats.dom );*/
+
+
+		var floorTexture = new THREE.ImageUtils.loadTexture( 'img/waternormals.jpg' ); 
+		floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+		floorTexture.repeat.set(1, 1);
+		var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
+		floorMaterial.opacity = 0.5;
+		var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
+		var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+		floor.position.y = -0.5;
+		floor.rotation.x = Math.PI / 2;
+		scene.add(floor);
+
+
+		var audio_crash = document.createElement('audio');
+		var source = document.createElement('source');
+		source.src = 'audio/titanic_iceberg.mp3';
+		audio_crash.appendChild(source);
+
+		var audio_feels = document.createElement('audio');
+		var source2 = document.createElement('source');
+		source2.src = 'audio/my_heart.mp3';
+		audio_feels.appendChild(source2);
+		
+
+		camera.position.z = 20;
+		camera.position.y = 5;
+		camera.position.x = distance_x_ship;	
+
+
+		var id1;
+		var id2;
+		var id3;
+
+		var anim1_done = false;
+		var anim2_done = false;
+		var anim3_done = false;
+
+		function play_animation() 
+		{
+		   if(anim1_done == false)
+		   	{
+		   		document.getElementById('player').play();
+		   		id1 = requestAnimationFrame(animate);
+			}
+	       else if(anim2_done)
+	       	{
+	       		//document.getElementById('player').pause();
+	       		id2 = requestAnimationFrame(animate3);
+	   		}
+	   	   else if(anim1_done)
+	       id3 = requestAnimationFrame(animate2);
+
+
+		}
+    
+
+		document.onkeydown = checkKey;
+
+		function checkKey(e) {
+
+	    e = e || window.event;
+
+	    if (e.keyCode == '87') { // up
+	        //camera.position.y += 0.1;
+	    }
+	    else if (e.keyCode == '83') { //down
+	        //camera.position.y += -0.1;
+	    }
+	    else if (e.keyCode == '65') { //left
+	       //.position.x += -0.1;
+	       ship_mesh.position.z -=0.5;
+	    }
+	    else if (e.keyCode == '68') { //right
+	       //camera.position.x += 0.1;
+	       ship_mesh.position.z +=0.5;
+	    }
+
+	   	else if (e.keyCode == '80') { //P
+
+	       play_animation();
+	       
+	    }
+
+
+	   	else if (e.keyCode == '27') { //esc
+	       refresh();
+	    }
+	}
+	
+
+	var direction = new THREE.Vector3(0.1, 0, 0); // amount to move per frame
+
+	function animate() {
+	  ship_mesh.position.add(direction); // add to position
+	  camera.position.add(direction);
+	  controls.target.set(direction);
+
+	  var position = new THREE.Vector3();
+		position.getPositionFromMatrix( ship_mesh.matrixWorld );
+
+		controls.target = position;
+
+	  renderer.render(camera, scene); // render new frame
+
+	   id1 = requestAnimationFrame(animate); // keep looping
+
+	   if(ship_mesh.position.x >= 35)
+	   	audio_crash.play();
+	   if(ship_mesh.position.x >= 38)
+	   {
+	   	cancelAnimationFrame(id1);
+	   	anim1_done = true;
+	   	play_animation();
+	   	
+	   }
+	   	
+	}
+
+	var direction2 = new THREE.Vector3(-0.01, 0.01, -0.01); // amount to move per frame
+
+	var played = 0;
+	function animate2() {
+
+	  //ship_mesh.position.add(direction2); // add to position
+	  ship_mesh.rotation.set(ship_mesh.rotation.x -= 0.01, ship_mesh.rotation.y +=0.01, ship_mesh.rotation.z -= 0.01);
+	  	  var position = new THREE.Vector3();
+		position.getPositionFromMatrix( ship_mesh.matrixWorld );
+
+		controls.target = position;
+	  renderer.render(camera, scene); // render new frame
+
+	   id2 = requestAnimationFrame(animate2); // keep looping
+
+	   if(ship_mesh.rotation.x < -0.40)
+	   {
+	   	cancelAnimationFrame(id2);
+	   	anim2_done = true;
+	   	play_animation();
+	   	
+	   }
+	   	
+	}
+
+	function animate3() {
+
+/*		if(played != 1)
+		audio_feels.play();
+		played = 1;*/
+	  //ship_mesh.position.add(direction2); // add to position
+	  ship_mesh.position.set(ship_mesh.position.x += 0.005 , ship_mesh.position.y += -0.01, ship_mesh.position.z );
+	  	  var position = new THREE.Vector3();
+		position.getPositionFromMatrix( ship_mesh.matrixWorld );
+
+		controls.target = position;	
+	  renderer.render(camera, scene); // render new frame
+
+	   id3 = requestAnimationFrame(animate3); // keep looping
+
+	   if(ship_mesh.position.y <= -8)
+	   {
+	   	cancelAnimationFrame(id3);
+	   	//id = requestAnimationFrame(animate4);
+	   }
+	   	
+	}
+
+		function animate4() {
+	  //ship_mesh.position.add(direction2); // add to position
+	  ship_mesh.rotation.set(ship_mesh.rotation.x += 0.01, ship_mesh.rotation.y , ship_mesh.rotation.z );
+	  	  var position = new THREE.Vector3();
+		position.getPositionFromMatrix( ship_mesh.matrixWorld );
+
+		controls.target = position;	
+	  renderer.render(camera, scene); // render new frame
+
+	   id = requestAnimationFrame(animate4); // keep looping
+
+
+	   //log("X " + ship_mesh.rotation.x + " " + ship_mesh.rotation.y + " " + ship_mesh.rotation.z);
+	   if(ship_mesh.rotation.x == 2.07);
+	   {
+	   	cancelAnimationFrame(id);
+	   }
+	   	
+	}
+
+
+	//requestAnimationFrame(animate);
+	function refresh() {
+
+    setTimeout(function () {
+        location.reload()
+    }, 100);
+}
+
+function log(msg) {
+    setTimeout(function() {
+        throw new Error(msg);
+    }, 0);
+}
+			var render = function () {
+				requestAnimationFrame( render );
+
+
+				//sky_mesh.rotation.y += 0.001;
+				/*mesh.rotation.x += 0.01;
+				mesh.rotation.y += 0.01;*/
+				//if(ship_mesh.rotation.x < 20 && ship_mesh.rotation.y < 17 && ship_mesh.rotation.z < 20)
+
+/*				if(ship_mesh.position.x <= 30)
+				ship_mesh.position.x += 0.05;
+				if(ship_mesh.rotation.x >= -0.50)
+				ship_mesh.rotation.set(ship_mesh.rotation.x -= 0.01, ship_mesh.rotation.y +=0.01, ship_mesh.rotation.z -= 0.01);
+				//log(ship_mesh.rotation.x + " " + ship_mesh.rotation.y + " " + ship_mesh.rotation.z);  	
+				ship_mesh.position.set(ship_mesh.position.x += 0.01 , ship_mesh.position.y += -0.01, ship_mesh.position.z );*/
+
+				renderer.render(scene, camera);
+
+			};
+
+			render();
+</script>
+	</body>
+</html>
