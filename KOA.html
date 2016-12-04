@@ -17,7 +17,7 @@
 		</audio>
 	</div>
 		<script>
-		
+		var everything_loaded = false;
 		var distance_x_ship = -170;
 		var scene = new THREE.Scene();
 		var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -31,6 +31,12 @@
 
 		document.body.appendChild(renderer.domElement);
 		
+		//Loading models done, No Lag pls
+		THREE.DefaultLoadingManager.onProgress = function ( item, loaded, total ) {
+	    console.log( item, loaded, total );
+	    if(loaded == 8)
+	    	everything_loaded = true;
+		};
 		//add sky
 		var geometry = new THREE.SphereGeometry( 500, 60, 40 );
 		geometry.scale( - 1, 1, 1 );
@@ -74,6 +80,15 @@
 		scene.add(light7);
 
 
+		var light8 = new THREE.PointLight( 0xffffff, 1, 150 ); // color, intensity, distance
+		light8.position.set( distance_x_ship, 10, 100 );
+		scene.add(light8);
+
+		var light9 = new THREE.PointLight( 0xffffff, 1, 150 ); // color, intensity, distance
+		light9.position.set( distance_x_ship, 10, -100 );
+		scene.add(light9);
+
+
 		// Load the island 
 		var loader = new THREE.JSONLoader().load("models/island.json", function(geometry, materials){
 		  var material = new THREE.MultiMaterial(materials);
@@ -89,7 +104,7 @@
 		});
 
 		// Load the ship 
-		var loader = new THREE.JSONLoader().load("js/titanic_simulator.json", function(geometry, materials){
+		var loader = new THREE.JSONLoader().load("models/titanic_simulator.json", function(geometry, materials){
 		  var material = new THREE.MultiMaterial(materials);
 		  ship_mesh = new THREE.Mesh(geometry, material);
 		  ship_mesh.rotation.y = 4.7;
@@ -100,7 +115,7 @@
 		});
 
 		// Load the iceberg 
-		var loader = new THREE.JSONLoader().load("js/iceberg.json", function(geometry, materials){
+		var loader = new THREE.JSONLoader().load("models/iceberg.json", function(geometry, materials){
 		  var material = new THREE.MultiMaterial(materials);
 		  iceberg_mesh = new THREE.Mesh(geometry, material);
 
@@ -113,7 +128,7 @@
 		});
 
 		// Load the iceberg2 
-		var loader = new THREE.JSONLoader().load("js/iceberg.json", function(geometry, materials){
+		var loader = new THREE.JSONLoader().load("models/iceberg.json", function(geometry, materials){
 		  var material = new THREE.MultiMaterial(materials);
 		  iceberg_mesh2 = new THREE.Mesh(geometry, material);
 
@@ -130,8 +145,8 @@
 		stats.showPanel( 1 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 		document.body.appendChild( stats.dom );*/
 
-
-		var floorTexture = new THREE.ImageUtils.loadTexture( 'img/waternormals.jpg' ); 
+		var textureLoader = new THREE.TextureLoader();
+		var floorTexture = textureLoader.load( 'img/waternormals.jpg' ); 
 		floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
 		floorTexture.repeat.set(1, 1);
 		var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
@@ -208,8 +223,8 @@
 	    }
 
 	   	else if (e.keyCode == '80') { //P
-
-	       play_animation();
+	   		if(everything_loaded)
+	       		play_animation();
 	       
 	    }
 
@@ -228,11 +243,11 @@
 	  controls.target.set(direction);
 
 	  var position = new THREE.Vector3();
-		position.getPositionFromMatrix( ship_mesh.matrixWorld );
+		position.setFromMatrixPosition( ship_mesh.matrixWorld );
 
 		controls.target = position;
 
-	  renderer.render(camera, scene); // render new frame
+	  //renderer.render(camera, scene); // render new frame
 
 	   id1 = requestAnimationFrame(animate); // keep looping
 
@@ -256,10 +271,10 @@
 	  //ship_mesh.position.add(direction2); // add to position
 	  ship_mesh.rotation.set(ship_mesh.rotation.x -= 0.01, ship_mesh.rotation.y +=0.01, ship_mesh.rotation.z -= 0.01);
 	  	  var position = new THREE.Vector3();
-		position.getPositionFromMatrix( ship_mesh.matrixWorld );
+		position.setFromMatrixPosition( ship_mesh.matrixWorld );
 
 		controls.target = position;
-	  renderer.render(camera, scene); // render new frame
+	  //renderer.render(camera, scene); // render new frame
 
 	   id2 = requestAnimationFrame(animate2); // keep looping
 
@@ -281,10 +296,10 @@
 	  //ship_mesh.position.add(direction2); // add to position
 	  ship_mesh.position.set(ship_mesh.position.x += 0.005 , ship_mesh.position.y += -0.01, ship_mesh.position.z );
 	  	  var position = new THREE.Vector3();
-		position.getPositionFromMatrix( ship_mesh.matrixWorld );
+		position.setFromMatrixPosition( ship_mesh.matrixWorld );
 
 		controls.target = position;	
-	  renderer.render(camera, scene); // render new frame
+	  //renderer.render(camera, scene); // render new frame
 
 	   id3 = requestAnimationFrame(animate3); // keep looping
 
@@ -300,7 +315,7 @@
 	  //ship_mesh.position.add(direction2); // add to position
 	  ship_mesh.rotation.set(ship_mesh.rotation.x += 0.01, ship_mesh.rotation.y , ship_mesh.rotation.z );
 	  	  var position = new THREE.Vector3();
-		position.getPositionFromMatrix( ship_mesh.matrixWorld );
+		position.setFromMatrixPosition( ship_mesh.matrixWorld );
 
 		controls.target = position;	
 	  renderer.render(camera, scene); // render new frame
